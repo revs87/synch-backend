@@ -1,9 +1,7 @@
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.kotlin.jpa)
-    alias(libs.plugins.spring.boot)
-    alias(libs.plugins.spring.dependency.management)
-    alias(libs.plugins.kotlin.spring)
+    id("java-library")
+    id("synch.spring-boot-service")
+    kotlin("plugin.jpa")
 }
 
 group = "com.rvcoding"
@@ -16,7 +14,8 @@ repositories {
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
+    implementation(projects.common)
+
 }
 
 tasks.test {

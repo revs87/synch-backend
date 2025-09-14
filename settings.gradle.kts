@@ -6,6 +6,10 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+/* Enables module lib access: implementation(projects.chat) */
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 rootProject.name = "synch"
 
 include("app")
