@@ -1,4 +1,4 @@
-package com.rvcoding.user.domain.model
+package com.rvcoding.synch.domain.model
 
 import java.util.UUID
 

@@ -1,6 +1,6 @@
-package com.rvcoding.user.infra.database.entities
+package com.rvcoding.synch.infra.database.entities
 
-import com.rvcoding.user.domain.model.UserId
+import com.rvcoding.synch.domain.model.UserId
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -32,7 +32,7 @@ class UserEntity( // data classes are immutable
     @Column(nullable = false, unique = true)
     var hashedPassword: String,
     @Column(nullable = false)
-    var hasVerifiedEmail: Boolean,
+    var hasVerifiedEmail: Boolean = false,
     @CreationTimestamp
     var createdAt: Instant = Instant.now(),
     @UpdateTimestamp

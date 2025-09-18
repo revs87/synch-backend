@@ -6,12 +6,13 @@ spring:
   datasource:
 #   not r2dbc
     url: jdbc:postgresql://db.lqrtwfeiapcybhlfcggz.supabase.co:5432/postgres
+#    url: jdbc:postgresql://aws-1-eu-west-2.pooler.supabase.com:5432/postgres
     username: postgres
+#    username: postgres.lqrtwfeiapcybhlfcggz
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-    hikari:
-#     handles connection pool
+    hikari: # handles connection pool
       maximum-pool-size: 10
       minimum-idle: 5
       connection-timeout: 20000
@@ -29,8 +30,7 @@ spring:
         connectTimeout: 10
   jpa:
     properties:
-#      java persistence api
-      hibernate:
+      hibernate: # java persistence api
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         show_sql: true
