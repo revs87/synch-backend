@@ -2,7 +2,8 @@ package com.rvcoding.synch.service.auth
 
 import com.rvcoding.synch.domain.exception.NullPasswordException
 import com.rvcoding.synch.domain.exception.UserAlreadyExistsException
-import com.rvcoding.synch.domain.model.PasswordHash
+import com.rvcoding.synch.domain.model.PasswordHash.Encoded
+import com.rvcoding.synch.domain.model.PasswordHash.Null
 import com.rvcoding.synch.domain.model.User
 import com.rvcoding.synch.infra.database.entities.UserEntity
 import com.rvcoding.synch.infra.database.mappers.toUser
@@ -24,8 +25,8 @@ class AuthService(
         if (user != null) throw UserAlreadyExistsException()
 
         when (val hashedPassword = passwordEncoder.encode(password)) {
-            PasswordHash.Null -> throw NullPasswordException()
-            is PasswordHash.Encoded -> {
+            Null -> throw NullPasswordException()
+            is Encoded -> {
                 val savedUser = userRepository.save(
                     UserEntity(
                         email = email.trim(),
