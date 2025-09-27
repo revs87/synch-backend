@@ -39,18 +39,17 @@ class JwtService(
     }
     fun validateAccessToken(token: String) = validateToken(token, "access")
     fun validateRefreshToken(token: String) = validateToken(token, "refresh")
-
-    private fun validateToken(token: String, type: String): Boolean {
-        val claims = parseAllClaims(token) ?: return false
-        val tokenType = claims["type"] as? String ?: return false
-        return tokenType == type
-    }
-
     fun getUserIdFromToken(token: String): UserId {
         val claims = parseAllClaims(token) ?: throw InvalidTokenException(
             message = "The attached JWT token is invalid"
         )
         return UUID.fromString(claims.subject)
+    }
+
+    private fun validateToken(token: String, type: String): Boolean {
+        val claims = parseAllClaims(token) ?: return false
+        val tokenType = claims["type"] as? String ?: return false
+        return tokenType == type
     }
 
     private fun generateToken(
