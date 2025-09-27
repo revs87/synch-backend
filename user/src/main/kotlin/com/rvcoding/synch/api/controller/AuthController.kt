@@ -2,6 +2,7 @@ package com.rvcoding.synch.api.controller
 
 import com.rvcoding.synch.api.dto.AuthenticatedUserDto
 import com.rvcoding.synch.api.dto.LoginRequest
+import com.rvcoding.synch.api.dto.RefreshRequest
 import com.rvcoding.synch.api.dto.RegisterRequest
 import com.rvcoding.synch.api.dto.UserDto
 import com.rvcoding.synch.api.mappers.toAuthenticatedUserDto
@@ -36,5 +37,14 @@ class AuthController(private val authService: AuthService) {
             email = body.email,
             password = body.password,
         ).toAuthenticatedUserDto()
+    }
+
+    @PostMapping("/refresh")
+    fun refresh(
+        @RequestBody body: RefreshRequest
+    ): AuthenticatedUserDto {
+        return authService
+            .refresh(body.refreshToken)
+            .toAuthenticatedUserDto()
     }
 }
