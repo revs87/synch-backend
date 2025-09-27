@@ -1,6 +1,7 @@
 package com.rvcoding.synch.service.auth
 
 import com.rvcoding.synch.domain.exception.InvalidCredentialsException
+import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.NullPasswordException
 import com.rvcoding.synch.domain.exception.UserAlreadyExistsException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
@@ -18,7 +19,9 @@ import com.rvcoding.synch.infra.security.PasswordEncoder
 import java.security.MessageDigest
 import java.time.Instant
 import java.util.Base64
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AuthService(
@@ -77,6 +80,42 @@ class AuthService(
                 user = user.toUser(),
                 accessToken = accessToken,
                 refreshToken = refreshToken
+            )
+        } ?: throw UserNotFoundException()
+    }
+
+    @Transactional
+    fun refresh(refreshToken: String): AuthenticatedUser {
+        if (!jwtService.validateRefreshToken(refreshToken)) {
+            throw InvalidTokenException("Invalid refresh token")
+        }
+
+        val userId = jwtService.getUserIdFromToken(refreshToken)
+        val user = userRepository.findByIdOrNull(userId)
+            ?: throw UserNotFoundException()
+
+        val hashed = hashToken(refreshToken)
+
+        return user.id?.let { userId ->
+            refreshTokenRepository.findByUserIdAndHashedToken(
+                userId = userId,
+                hashedToken = hashed
+            ) ?: throw InvalidTokenException("Invalid refresh token")
+
+            refreshTokenRepository.deleteByUserIdAndHashedToken(
+                userId = userId,
+                hashedToken = hashed
+            )
+
+            val newAccessToken = jwtService.generateAccessToken(userId)
+            val newRefreshToken = jwtService.generateRefreshToken(userId)
+
+            storeRefreshToken(userId, newRefreshToken)
+
+            AuthenticatedUser(
+                user = user.toUser(),
+                accessToken = newAccessToken,
+                refreshToken = newRefreshToken
             )
         } ?: throw UserNotFoundException()
     }
