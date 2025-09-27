@@ -17,7 +17,11 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder
 ) {
 
-    fun register(email: String, username: String, password: String): User {
+    fun register(
+        email: String,
+        username: String,
+        password: String
+    ): User {
         val user = userRepository.findByEmailOrUsername(
             email = email.trim(),
             username = username.trim()
