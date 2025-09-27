@@ -1,7 +1,9 @@
 package com.rvcoding.synch.api.exception
 
+import com.rvcoding.synch.domain.exception.InvalidCredentialsException
 import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.UserAlreadyExistsException
+import com.rvcoding.synch.domain.exception.UserNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -16,6 +18,20 @@ class AuthExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     fun onUserAlreadyExists(e: UserAlreadyExistsException) = mapOf(
         "code" to "USER_EXISTS",
+        "message" to e.message
+    )
+
+    @ExceptionHandler(UserNotFoundException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun onUserNotFound(e: UserNotFoundException) = mapOf(
+        "code" to "USER_NOT_FOUND",
+        "message" to e.message
+    )
+
+    @ExceptionHandler(InvalidCredentialsException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun onUserNotFound(e: InvalidCredentialsException) = mapOf(
+        "code" to "INVALID_CREDENTIALS",
         "message" to e.message
     )
 
