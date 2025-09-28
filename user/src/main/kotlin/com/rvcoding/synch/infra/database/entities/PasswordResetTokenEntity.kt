@@ -36,8 +36,13 @@ class PasswordResetTokenEntity(
     @CreationTimestamp
     var createdAt: Instant = Instant.now(),
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     var user: UserEntity
-)
+) {
+    val isUsed: Boolean
+        get() = usedAt != null
+
+    val isExpired: Boolean
+        get() = Instant.now().isAfter(expiresAt)
+}
