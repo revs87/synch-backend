@@ -27,11 +27,17 @@ class EmailVerificationTokenEntity(
     @Column(nullable = false)
     var expiresAt: Instant,
     @Column
-    var usedAt: Instant?,
+    var usedAt: Instant? = null,
     @CreationTimestamp
     var createdAt: Instant = Instant.now(),
 
     @ManyToOne(fetch = FetchType.LAZY) // One user can have Many tokens
     @JoinColumn(name = "user_id", nullable = false)
     val user: UserEntity
-)
+) {
+    val isUsed: Boolean
+        get() = usedAt != null
+
+    val isExpired: Boolean
+        get() = Instant.now().isAfter(expiresAt)
+}
