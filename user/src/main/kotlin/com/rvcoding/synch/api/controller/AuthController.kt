@@ -1,14 +1,19 @@
 package com.rvcoding.synch.api.controller
 
 import com.rvcoding.synch.api.dto.AuthenticatedUserDto
+import com.rvcoding.synch.api.dto.ChangePasswordRequest
+import com.rvcoding.synch.api.dto.EmailRequest
 import com.rvcoding.synch.api.dto.LoginRequest
 import com.rvcoding.synch.api.dto.RefreshRequest
 import com.rvcoding.synch.api.dto.RegisterRequest
+import com.rvcoding.synch.api.dto.ResetPasswordRequest
 import com.rvcoding.synch.api.dto.UserDto
 import com.rvcoding.synch.api.mappers.toAuthenticatedUserDto
 import com.rvcoding.synch.api.mappers.toUserDto
 import com.rvcoding.synch.service.auth.AuthService
 import com.rvcoding.synch.service.auth.EmailVerificationService
+import com.rvcoding.synch.service.auth.JwtService
+import com.rvcoding.synch.service.auth.PasswordResetService
 import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,7 +26,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/auth")
 class AuthController(
     private val authService: AuthService,
-    private val emailVerificationService: EmailVerificationService
+    private val emailVerificationService: EmailVerificationService,
+    private val passwordResetService: PasswordResetService,
+    private val jwtService: JwtService
 ) {
 
     @PostMapping("/register")
@@ -66,5 +73,37 @@ class AuthController(
         @RequestParam token: String
     ) {
         emailVerificationService.verifyEmail(token)
+    }
+
+    @PostMapping("/forgot-password")
+    fun forgotPassword(
+        @Valid @RequestBody body: EmailRequest
+    ) {
+        passwordResetService.requestPasswordReset(
+            email = body.email.trim()
+        )
+    }
+
+    @PostMapping("/reset-password")
+    fun resetPassword(
+        @Valid @RequestBody body: ResetPasswordRequest
+    ) {
+        passwordResetService.resetPassword(
+            token = body.token,
+            newPassword = body.newPassword.trim()
+        )
+    }
+
+    @PostMapping("/change-password")
+    fun changePassword(
+        @Valid @RequestBody body: ChangePasswordRequest
+    ) {
+//        passwordResetService.changePassword(
+//            userId = jwtService.getUserIdFromToken(token = body.token), // must be from an authenticated user
+//            oldPassword = body.oldPassword.trim(),
+//            newPassword = body.newPassword.trim()
+//        )
+
+        // TODO: Extract request user ID and call service
     }
 }

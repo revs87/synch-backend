@@ -3,6 +3,7 @@ package com.rvcoding.synch.api.exception
 import com.rvcoding.synch.domain.exception.EmailNotVerifiedException
 import com.rvcoding.synch.domain.exception.InvalidCredentialsException
 import com.rvcoding.synch.domain.exception.InvalidTokenException
+import com.rvcoding.synch.domain.exception.SamePasswordException
 import com.rvcoding.synch.domain.exception.UserAlreadyExistsException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
 import org.springframework.http.HttpStatus
@@ -47,6 +48,13 @@ class AuthExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     fun onEmailNotVerified(e: EmailNotVerifiedException) = mapOf(
         "code" to "EMAIL_NOT_VERIFIED",
+        "message" to e.message
+    )
+
+    @ExceptionHandler(SamePasswordException::class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    fun onSamePassword(e: SamePasswordException) = mapOf(
+        "code" to "SAME_PASSWORD",
         "message" to e.message
     )
 

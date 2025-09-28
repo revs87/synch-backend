@@ -41,7 +41,7 @@ class JwtService(
     fun validateRefreshToken(token: String) = validateToken(token, "refresh")
     fun getUserIdFromToken(token: String): UserId {
         val claims = parseAllClaims(token) ?: throw InvalidTokenException(
-            message = "The attached JWT token is invalid"
+            message = "The attached JWT token is invalid."
         )
         return UUID.fromString(claims.subject)
     }

@@ -41,12 +41,12 @@ class EmailVerificationService(
     @Transactional
     fun verifyEmail(token: String) {
         val verificationToken = emailVerificationTokenRepository.findByToken(token)
-            ?: throw InvalidTokenException("Email verification token is invalid")
+            ?: throw InvalidTokenException("Email verification token is invalid.")
         if (verificationToken.isUsed) {
-            throw InvalidTokenException("Email verification token is already used")
+            throw InvalidTokenException("Email verification token is already used.")
         }
         if (verificationToken.isExpired) {
-            throw InvalidTokenException("Email verification token is expired")
+            throw InvalidTokenException("Email verification token is expired.")
         }
 
         emailVerificationTokenRepository.save(
