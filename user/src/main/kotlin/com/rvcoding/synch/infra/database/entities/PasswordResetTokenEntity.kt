@@ -14,15 +14,16 @@ import jakarta.persistence.Table
 import java.time.Instant
 import org.hibernate.annotations.CreationTimestamp
 
+
 @Entity
 @Table(
-    name = "email_verification_tokens",
+    name = "password_reset_tokens",
     schema = "user_service",
     indexes = [
-        Index(name = "idx_email_verification_tokens_token", columnList = "token")
+        Index(name = "idx_password_reset_tokens_token", columnList = "token")
     ]
 )
-class EmailVerificationTokenEntity(
+class PasswordResetTokenEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
@@ -30,18 +31,13 @@ class EmailVerificationTokenEntity(
     var token: String = TokenGenerator.generateSecureToken(),
     @Column(nullable = false)
     var expiresAt: Instant,
-    @Column
+    @Column(nullable = true)
     var usedAt: Instant? = null,
     @CreationTimestamp
     var createdAt: Instant = Instant.now(),
 
-    @ManyToOne(fetch = FetchType.LAZY) // One user can have Many tokens
-    @JoinColumn(name = "user_id", nullable = false)
-    val user: UserEntity
-) {
-    val isUsed: Boolean
-        get() = usedAt != null
 
-    val isExpired: Boolean
-        get() = Instant.now().isAfter(expiresAt)
-}
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    var user: UserEntity
+)
