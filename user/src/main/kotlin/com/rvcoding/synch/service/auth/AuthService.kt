@@ -1,5 +1,6 @@
 package com.rvcoding.synch.service.auth
 
+import com.rvcoding.synch.domain.exception.EmailNotVerifiedException
 import com.rvcoding.synch.domain.exception.InvalidCredentialsException
 import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.NullPasswordException
@@ -28,30 +29,37 @@ class AuthService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService,
-    private val refreshTokenRepository: RefreshTokenRepository
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val emailVerificationService: EmailVerificationService
 ) {
 
+    @Transactional
     fun register(
         email: String,
         username: String,
         password: String
     ): User {
+        val trimmedEmail = email.trim()
+        val trimmedUsername = username.trim()
         val user = userRepository.findByEmailOrUsername(
-            email = email.trim(),
-            username = username.trim()
+            email = trimmedEmail,
+            username = trimmedUsername
         )
         if (user != null) throw UserAlreadyExistsException()
 
         when (val hashedPassword = passwordEncoder.encode(password)) {
             Null -> throw NullPasswordException()
             is Encoded -> {
-                val savedUser = userRepository.save(
+                val savedUser = userRepository.saveAndFlush(
                     UserEntity(
-                        email = email.trim(),
-                        username = username.trim(),
+                        email = trimmedEmail,
+                        username = trimmedUsername,
                         hashedPassword = hashedPassword.hash
                     )
                 ).toUser()
+
+                emailVerificationService.createVerificationToken(trimmedEmail)
+
                 return savedUser
             }
         }
@@ -63,12 +71,12 @@ class AuthService(
     ): AuthenticatedUser {
         val user = userRepository.findByEmail(email.trim())
             ?: throw InvalidCredentialsException()
-
         if (!passwordEncoder.matches(password, user.hashedPassword)) {
             throw InvalidCredentialsException()
         }
-
-        // TODO: Check for verified email
+        if (!user.hasVerifiedEmail) {
+            throw EmailNotVerifiedException()
+        }
 
         return user.id?.let { userId ->
             val accessToken = jwtService.generateAccessToken(userId)
