@@ -3,6 +3,14 @@ spring:
     name: synch
 #    admin:
 #        enabled: true
+  data:
+    redis:
+      host: "redis-11147.crce202.eu-west-3-1.ec2.redns.redis-cloud.com"
+      port: 11147
+      username: "default"
+      password: ${REDIS_PASSWORD}
+      connect-timeout: 5000ms
+      timeout: 2000ms
   datasource:
 #   not r2dbc
     url: jdbc:postgresql://db.lqrtwfeiapcybhlfcggz.supabase.co:5432/postgres
