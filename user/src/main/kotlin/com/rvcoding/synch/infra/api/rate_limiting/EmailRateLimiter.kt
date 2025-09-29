@@ -1,7 +1,8 @@
-package com.rvcoding.synch.infra.rate_limiting
+package com.rvcoding.synch.infra.api.rate_limiting
 
 import com.rvcoding.synch.domain.exception.RateLimitException
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.Resource
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.script.DefaultRedisScript
 import org.springframework.stereotype.Component
@@ -12,7 +13,7 @@ class EmailRateLimiter(
 ) {
 
     @Value("classpath:email_rate_limit.lua")
-    lateinit var rateLimiterResource: org.springframework.core.io.Resource
+    lateinit var rateLimiterResource: Resource
 
     private val rateLimitScript by lazy {
         val script = rateLimiterResource.inputStream.use {

@@ -52,3 +52,11 @@ synch:
       expiry-hours: 24
     reset-password:
       expiry-minutes: 30
+
+nginx:
+  # require-proxy: true - enforces requests to come through a proxy (nginx)
+  trusted-ips:
+    - "127.0.0.1" # nginx on the same machine
+    - "::1" # IPv6 localhost
+    - "127.17.0.0/16" # nginx container IP when using Docker
+    - "10.0.0.5/32" # nginx server IP (if separate machince)
