@@ -10,6 +10,7 @@ import com.rvcoding.synch.api.dto.ResetPasswordRequest
 import com.rvcoding.synch.api.dto.UserDto
 import com.rvcoding.synch.api.mappers.toAuthenticatedUserDto
 import com.rvcoding.synch.api.mappers.toUserDto
+import com.rvcoding.synch.infra.rate_limiting.EmailRateLimiter
 import com.rvcoding.synch.service.auth.AuthService
 import com.rvcoding.synch.service.auth.EmailVerificationService
 import com.rvcoding.synch.service.auth.JwtService
@@ -28,7 +29,8 @@ class AuthController(
     private val authService: AuthService,
     private val emailVerificationService: EmailVerificationService,
     private val passwordResetService: PasswordResetService,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val emailRateLimiter: EmailRateLimiter
 ) {
 
     @PostMapping("/register")
@@ -73,6 +75,17 @@ class AuthController(
         @RequestParam token: String
     ) {
         emailVerificationService.verifyEmail(token)
+    }
+
+    @PostMapping("/resend-verification")
+    fun resendVerification(
+        @Valid @RequestBody body: EmailRequest
+    ) {
+        emailRateLimiter.withRateLimit(
+            email = body.email
+        ) {
+            emailVerificationService.resendVerificationToken(body.email)
+        }
     }
 
     @PostMapping("/forgot-password")

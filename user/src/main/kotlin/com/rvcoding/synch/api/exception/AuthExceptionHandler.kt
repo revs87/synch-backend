@@ -3,6 +3,7 @@ package com.rvcoding.synch.api.exception
 import com.rvcoding.synch.domain.exception.EmailNotVerifiedException
 import com.rvcoding.synch.domain.exception.InvalidCredentialsException
 import com.rvcoding.synch.domain.exception.InvalidTokenException
+import com.rvcoding.synch.domain.exception.RateLimitException
 import com.rvcoding.synch.domain.exception.SamePasswordException
 import com.rvcoding.synch.domain.exception.UserAlreadyExistsException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
@@ -48,6 +49,13 @@ class AuthExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     fun onEmailNotVerified(e: EmailNotVerifiedException) = mapOf(
         "code" to "EMAIL_NOT_VERIFIED",
+        "message" to e.message
+    )
+
+    @ExceptionHandler(RateLimitException::class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    fun onRateLimitExceeded(e: RateLimitException) = mapOf(
+        "code" to "RATE_LIMIT_EXCEEDED",
         "message" to e.message
     )
 
