@@ -47,11 +47,12 @@ jwt:
   secret: ${JWT_SECRET_BASE64}
 
 synch:
-  email:
-    verification:
-      expiry-hours: 24
-    reset-password:
-      expiry-minutes: 30
+  rate-limit:
+    email:
+      verification:
+        expiry-hours: 24
+      reset-password:
+        expiry-minutes: 30
 
 nginx:
   # require-proxy: true - enforces requests to come through a proxy (nginx)

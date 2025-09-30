@@ -1,5 +1,6 @@
 package com.rvcoding.synch.api.controller
 
+import com.rvcoding.synch.api.config.IpRateLimit
 import com.rvcoding.synch.api.dto.AuthenticatedUserDto
 import com.rvcoding.synch.api.dto.ChangePasswordRequest
 import com.rvcoding.synch.api.dto.EmailRequest
@@ -16,6 +17,7 @@ import com.rvcoding.synch.service.auth.EmailVerificationService
 import com.rvcoding.synch.service.auth.JwtService
 import com.rvcoding.synch.service.auth.PasswordResetService
 import jakarta.validation.Valid
+import java.util.concurrent.TimeUnit
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -34,6 +36,11 @@ class AuthController(
 ) {
 
     @PostMapping("/register")
+    @IpRateLimit(
+        requests = 10,
+        duration = 1L,
+        unit = TimeUnit.HOURS
+    )
     fun register(
         @Valid @RequestBody body: RegisterRequest
     ): UserDto {
@@ -45,7 +52,12 @@ class AuthController(
     }
 
     @PostMapping("/login")
-    fun register(
+    @IpRateLimit(
+        requests = 10,
+        duration = 1L,
+        unit = TimeUnit.HOURS
+    )
+    fun login(
         @RequestBody body: LoginRequest
     ): AuthenticatedUserDto {
         return authService.login(
@@ -55,6 +67,11 @@ class AuthController(
     }
 
     @PostMapping("/refresh")
+    @IpRateLimit(
+        requests = 10,
+        duration = 1L,
+        unit = TimeUnit.HOURS
+    )
     fun refresh(
         @RequestBody body: RefreshRequest
     ): AuthenticatedUserDto {
@@ -78,6 +95,11 @@ class AuthController(
     }
 
     @PostMapping("/resend-verification")
+    @IpRateLimit(
+        requests = 10,
+        duration = 1L,
+        unit = TimeUnit.HOURS
+    )
     fun resendVerification(
         @Valid @RequestBody body: EmailRequest
     ) {
@@ -89,6 +111,11 @@ class AuthController(
     }
 
     @PostMapping("/forgot-password")
+    @IpRateLimit(
+        requests = 10,
+        duration = 1L,
+        unit = TimeUnit.HOURS
+    )
     fun forgotPassword(
         @Valid @RequestBody body: EmailRequest
     ) {

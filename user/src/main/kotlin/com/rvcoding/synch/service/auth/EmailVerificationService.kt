@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 class EmailVerificationService(
     private val emailVerificationTokenRepository: EmailVerificationTokenRepository,
     private val userRepository: UserRepository,
-    @param:Value("\${synch.email.verification.expiry-hours}") private val expiryHours: Long
+    @param:Value("\${synch.rate-limit.email.verification.expiry-hours}") private val expiryHours: Long
 ) {
 
     fun resendVerificationToken(email: String) {

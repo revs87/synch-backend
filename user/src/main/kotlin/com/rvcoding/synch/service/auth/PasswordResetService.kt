@@ -27,7 +27,7 @@ class PasswordResetService(
     private val refreshTokenRepository: RefreshTokenRepository,
     private val passwordResetTokenRepository: PasswordResetTokenRepository,
     private val passwordEncoder: PasswordEncoder,
-    @param:Value("\${synch.email.reset-password.expiry-minutes}")
+    @param:Value("\${synch.rate-limit.email.reset-password.expiry-minutes}")
     private val expiryMinutes: Long
 ) {
     @Transactional
