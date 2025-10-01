@@ -5,6 +5,7 @@ import com.rvcoding.synch.domain.exception.InvalidCredentialsException
 import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.RateLimitException
 import com.rvcoding.synch.domain.exception.SamePasswordException
+import com.rvcoding.synch.domain.exception.UnauthorizedException
 import com.rvcoding.synch.domain.exception.UserAlreadyExistsException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
 import org.springframework.http.HttpStatus
@@ -49,6 +50,13 @@ class AuthExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     fun onEmailNotVerified(e: EmailNotVerifiedException) = mapOf(
         "code" to "EMAIL_NOT_VERIFIED",
+        "message" to e.message
+    )
+
+    @ExceptionHandler(UnauthorizedException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun onUnauthorized(e: UnauthorizedException) = mapOf(
+        "code" to "UNAUTHORIZED",
         "message" to e.message
     )
 

@@ -11,10 +11,10 @@ import com.rvcoding.synch.api.dto.ResetPasswordRequest
 import com.rvcoding.synch.api.dto.UserDto
 import com.rvcoding.synch.api.mappers.toAuthenticatedUserDto
 import com.rvcoding.synch.api.mappers.toUserDto
+import com.rvcoding.synch.api.utils.requestUserId
 import com.rvcoding.synch.infra.api.rate_limiting.EmailRateLimiter
 import com.rvcoding.synch.service.auth.AuthService
 import com.rvcoding.synch.service.auth.EmailVerificationService
-import com.rvcoding.synch.service.auth.JwtService
 import com.rvcoding.synch.service.auth.PasswordResetService
 import jakarta.validation.Valid
 import java.util.concurrent.TimeUnit
@@ -31,7 +31,6 @@ class AuthController(
     private val authService: AuthService,
     private val emailVerificationService: EmailVerificationService,
     private val passwordResetService: PasswordResetService,
-    private val jwtService: JwtService,
     private val emailRateLimiter: EmailRateLimiter
 ) {
 
@@ -143,12 +142,10 @@ class AuthController(
     fun changePassword(
         @Valid @RequestBody body: ChangePasswordRequest
     ) {
-//        passwordResetService.changePassword(
-//            userId = jwtService.getUserIdFromToken(token = body.token), // must be from an authenticated user
-//            oldPassword = body.oldPassword.trim(),
-//            newPassword = body.newPassword.trim()
-//        )
-
-        // TODO: Extract request user ID and call service
+        passwordResetService.changePassword(
+            userId = requestUserId,
+            oldPassword = body.oldPassword.trim(),
+            newPassword = body.newPassword.trim()
+        )
     }
 }
