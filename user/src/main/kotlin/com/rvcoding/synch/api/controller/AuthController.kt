@@ -37,9 +37,10 @@ class AuthController(
 
     @PostMapping("/register")
     @IpRateLimit(
-        requests = 10,
+        requests = 5,
         duration = 1L,
-        unit = TimeUnit.HOURS
+        unit = TimeUnit.HOURS,
+        endpoint = "/auth"
     )
     fun register(
         @Valid @RequestBody body: RegisterRequest
@@ -55,7 +56,8 @@ class AuthController(
     @IpRateLimit(
         requests = 10,
         duration = 1L,
-        unit = TimeUnit.HOURS
+        unit = TimeUnit.HOURS,
+        endpoint = "/auth"
     )
     fun login(
         @RequestBody body: LoginRequest
@@ -70,7 +72,8 @@ class AuthController(
     @IpRateLimit(
         requests = 10,
         duration = 1L,
-        unit = TimeUnit.HOURS
+        unit = TimeUnit.HOURS,
+        endpoint = "/auth/refresh"
     )
     fun refresh(
         @RequestBody body: RefreshRequest
@@ -96,9 +99,10 @@ class AuthController(
 
     @PostMapping("/resend-verification")
     @IpRateLimit(
-        requests = 10,
+        requests = 5,
         duration = 1L,
-        unit = TimeUnit.HOURS
+        unit = TimeUnit.HOURS,
+        endpoint = "/auth/resend-verification"
     )
     fun resendVerification(
         @Valid @RequestBody body: EmailRequest
@@ -112,9 +116,10 @@ class AuthController(
 
     @PostMapping("/forgot-password")
     @IpRateLimit(
-        requests = 10,
+        requests = 5,
         duration = 1L,
-        unit = TimeUnit.HOURS
+        unit = TimeUnit.HOURS,
+        endpoint = "/auth/forgot-password"
     )
     fun forgotPassword(
         @Valid @RequestBody body: EmailRequest

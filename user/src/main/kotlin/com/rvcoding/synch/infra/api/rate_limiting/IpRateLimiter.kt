@@ -31,9 +31,10 @@ class IpRateLimiter(
         ipAddress: String,
         resetsIn: Duration,
         maxRequestsPerIp: Int,
+        endpoint: String,
         action: () -> T
     ): T {
-        val key = "$IP_RATE_LIMIT_PREFIX:$ipAddress"
+        val key = "$IP_RATE_LIMIT_PREFIX:$ipAddress:$endpoint"
 
         val result = redisTemplate.execute(
             rateLimitScript,

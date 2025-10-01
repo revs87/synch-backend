@@ -38,6 +38,7 @@ class IpRateLimitInterceptor(
                             annotation.unit.toChronoUnit()
                         ),
                         maxRequestsPerIp = annotation.requests,
+                        endpoint = annotation.endpoint,
                         action = { true }
                     )
                 } catch (e: RateLimitException) {
