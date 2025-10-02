@@ -42,6 +42,26 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         show_sql: true
+  rabbitmq:
+    host: collie.lmq.cloudamqp.com
+    username: oduurtha
+    password: ${RABBITMQ_PASSWORD}
+    ssl:
+      enabled: true
+    virtual-host: oduurtha
+    listener:
+      simple:
+        acknowledge-mode: auto # manages queued delivery of events (ACKs the events automatically)
+        concurrency: 1 # free plan limitation
+        max-concurrency: 3
+        prefetch: 10
+        default-requeue-rejected: true
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-interval: 10000ms
+          max-attempts: 3
+          multiplier: 2 # First try is 1000ms. Second retry is 2000ms. Third would have been 4000ms.
 
 jwt:
   secret: ${JWT_SECRET_BASE64}
