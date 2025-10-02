@@ -7,7 +7,7 @@ import com.rvcoding.synch.domain.exception.SamePasswordException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
 import com.rvcoding.synch.domain.model.PasswordHash.Encoded
 import com.rvcoding.synch.domain.model.PasswordHash.Null
-import com.rvcoding.synch.domain.model.UserId
+import com.rvcoding.synch.domain.type.UserId
 import com.rvcoding.synch.infra.database.entities.PasswordResetTokenEntity
 import com.rvcoding.synch.infra.database.repositories.PasswordResetTokenRepository
 import com.rvcoding.synch.infra.database.repositories.RefreshTokenRepository

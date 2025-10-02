@@ -1,6 +1,6 @@
 package com.rvcoding.synch.infra.database.repositories
 
-import com.rvcoding.synch.domain.model.UserId
+import com.rvcoding.synch.domain.type.UserId
 import com.rvcoding.synch.infra.database.entities.RefreshTokenEntity
 import org.springframework.data.jpa.repository.JpaRepository
 

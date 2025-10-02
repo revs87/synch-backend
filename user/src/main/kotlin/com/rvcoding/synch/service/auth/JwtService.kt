@@ -1,7 +1,7 @@
 package com.rvcoding.synch.service.auth
 
 import com.rvcoding.synch.domain.exception.InvalidTokenException
-import com.rvcoding.synch.domain.model.UserId
+import com.rvcoding.synch.domain.type.UserId
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys

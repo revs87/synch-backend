@@ -1,7 +1,7 @@
 package com.rvcoding.synch.api.utils
 
 import com.rvcoding.synch.domain.exception.UnauthorizedException
-import com.rvcoding.synch.domain.model.UserId
+import com.rvcoding.synch.domain.type.UserId
 import org.springframework.security.core.context.SecurityContextHolder
 
 val requestUserId: UserId

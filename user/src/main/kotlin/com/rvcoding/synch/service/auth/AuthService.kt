@@ -10,7 +10,7 @@ import com.rvcoding.synch.domain.model.AuthenticatedUser
 import com.rvcoding.synch.domain.model.PasswordHash.Encoded
 import com.rvcoding.synch.domain.model.PasswordHash.Null
 import com.rvcoding.synch.domain.model.User
-import com.rvcoding.synch.domain.model.UserId
+import com.rvcoding.synch.domain.type.UserId
 import com.rvcoding.synch.infra.database.entities.RefreshTokenEntity
 import com.rvcoding.synch.infra.database.entities.UserEntity
 import com.rvcoding.synch.infra.database.mappers.toUser
