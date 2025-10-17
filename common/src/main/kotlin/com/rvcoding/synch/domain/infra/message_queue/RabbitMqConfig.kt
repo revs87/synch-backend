@@ -1,0 +1,67 @@
+package com.rvcoding.synch.domain.infra.message_queue
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
+import com.fasterxml.jackson.module.kotlin.KotlinModule
+import com.rabbitmq.client.ConnectionFactory
+import com.rvcoding.synch.domain.events.SynchEvent
+import com.rvcoding.synch.domain.events.user.UserEventConstants
+import org.springframework.amqp.core.Queue
+import org.springframework.amqp.core.TopicExchange
+import org.springframework.amqp.rabbit.core.RabbitTemplate
+import org.springframework.amqp.support.converter.Jackson2JavaTypeMapper
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+
+@Configuration
+class RabbitMqConfig {
+
+    @Bean
+    fun messageConverter(): Jackson2JsonMessageConverter {
+        val objectMapper = ObjectMapper().apply {
+            // Introduces the ability to serialize all Kotlin base classes
+            registerModule(KotlinModule.Builder().build())
+            findAndRegisterModules()
+
+            // Introduces the ability to serialize all classes that implement the interface SynchEvent
+            val polymorphicTypeValidator = BasicPolymorphicTypeValidator.builder()
+                .allowIfBaseType(SynchEvent::class.java)
+                .allowIfSubType("jave.util.") // Allow Java lists
+                .allowIfSubType("kotlin.collections.") // Allow Kotlin collections
+                .build()
+
+            activateDefaultTyping(
+                polymorphicTypeValidator,
+                ObjectMapper.DefaultTyping.NON_FINAL,
+            )
+        }
+
+        return Jackson2JsonMessageConverter(objectMapper).apply {
+            typePrecedence = Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID
+        }
+    }
+
+    @Bean
+    fun rabbitTemplate(
+        connectionFactory: ConnectionFactory,
+        messageConverter: Jackson2JsonMessageConverter
+    ): RabbitTemplate {
+        return RabbitTemplate(connectionFactory).apply {
+            this.messageConverter = messageConverter()
+        }
+    }
+
+    @Bean
+    fun userExchange() = TopicExchange(
+        /* name = */ UserEventConstants.USER_EXCHANGE,
+        /* durable = */ true,
+        /* autoDelete = */ false
+    )
+
+    @Bean
+    fun notificationUserEventsQueue() = Queue(
+        /* name = */ MessageQueues.NOTIFICATION_USER_EVENTS,
+        /* durable = */ true
+    )
+}
