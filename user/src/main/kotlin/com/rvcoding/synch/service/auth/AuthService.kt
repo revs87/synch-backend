@@ -1,11 +1,13 @@
 package com.rvcoding.synch.service.auth
 
+import com.rvcoding.synch.domain.events.user.UserEvent
 import com.rvcoding.synch.domain.exception.EmailNotVerifiedException
 import com.rvcoding.synch.domain.exception.InvalidCredentialsException
 import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.NullPasswordException
 import com.rvcoding.synch.domain.exception.UserAlreadyExistsException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
+import com.rvcoding.synch.domain.infra.message_queue.EventPublisher
 import com.rvcoding.synch.domain.model.AuthenticatedUser
 import com.rvcoding.synch.domain.model.PasswordHash.Encoded
 import com.rvcoding.synch.domain.model.PasswordHash.Null
@@ -30,7 +32,8 @@ class AuthService(
     private val passwordEncoder: PasswordEncoder,
     private val jwtService: JwtService,
     private val refreshTokenRepository: RefreshTokenRepository,
-    private val emailVerificationService: EmailVerificationService
+    private val emailVerificationService: EmailVerificationService,
+    private val eventPublisher: EventPublisher
 ) {
 
     @Transactional
@@ -58,7 +61,16 @@ class AuthService(
                     )
                 ).toUser()
 
-                emailVerificationService.createVerificationToken(trimmedEmail)
+                val verificationToken = emailVerificationService.createVerificationToken(trimmedEmail)
+
+                eventPublisher.publish(
+                    event = UserEvent.Created(
+                        userId = savedUser.id,
+                        email = savedUser.email,
+                        username = savedUser.username,
+                        verificationToken = verificationToken.token
+                    )
+                )
 
                 return savedUser
             }

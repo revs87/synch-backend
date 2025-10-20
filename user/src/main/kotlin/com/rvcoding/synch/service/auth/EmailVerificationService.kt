@@ -1,7 +1,9 @@
 package com.rvcoding.synch.service.auth
 
+import com.rvcoding.synch.domain.events.user.UserEvent
 import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
+import com.rvcoding.synch.domain.infra.message_queue.EventPublisher
 import com.rvcoding.synch.domain.model.EmailVerificationToken
 import com.rvcoding.synch.infra.database.entities.EmailVerificationTokenEntity
 import com.rvcoding.synch.infra.database.mappers.toEmailVerificationToken
@@ -18,11 +20,26 @@ import org.springframework.transaction.annotation.Transactional
 class EmailVerificationService(
     private val emailVerificationTokenRepository: EmailVerificationTokenRepository,
     private val userRepository: UserRepository,
+    private val eventPublisher: EventPublisher,
     @param:Value("\${synch.rate-limit.email.verification.expiry-hours}") private val expiryHours: Long
 ) {
 
+    @Transactional
     fun resendVerificationToken(email: String) {
-        // TODO: Trigger resend verification email
+        val verificationToken = createVerificationToken(email)
+
+        if (verificationToken.user.hasEmailVerified) {
+            return
+        }
+
+        eventPublisher.publish(
+            event = UserEvent.RequestResendVerification(
+                userId = verificationToken.user.id,
+                email = verificationToken.user.email,
+                username = verificationToken.user.username,
+                verificationToken = verificationToken.token
+            )
+        )
     }
 
     @Transactional
