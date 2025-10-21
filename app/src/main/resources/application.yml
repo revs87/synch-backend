@@ -42,6 +42,15 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         show_sql: true
+  mail:
+    host: smtp.mailgun.org
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   rabbitmq:
     host: collie.lmq.cloudamqp.com
     username: oduurtha

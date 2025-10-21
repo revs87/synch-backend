@@ -1,7 +1,11 @@
 spring:
   jpa:
     hibernate:
-      ddl-auto:
+      ddl-auto: validate
+  mail:
+    # To be updated with a production domain (not with a sandboxed one)
+    username: synchsmtp@sandbox46f1ced43a5d4e548b7e5b6665a69a6b.mailgun.org
+    password: ${MAILGUN_PASSWORD}
 
 jwt:
   expiration-minutes: 15
