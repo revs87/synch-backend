@@ -15,6 +15,7 @@ import org.springframework.amqp.core.TopicExchange
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory
 import org.springframework.amqp.rabbit.connection.ConnectionFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
+import org.springframework.amqp.support.converter.DefaultJackson2JavaTypeMapper
 import org.springframework.amqp.support.converter.Jackson2JavaTypeMapper
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter
 import org.springframework.context.annotation.Bean
@@ -37,7 +38,7 @@ class RabbitMqConfig {
             // Introduces the ability to serialize all classes that implement the interface SynchEvent
             val polymorphicTypeValidator = BasicPolymorphicTypeValidator.builder()
                 .allowIfBaseType(SynchEvent::class.java)
-                .allowIfSubType("jave.util.") // Allow Java lists
+                .allowIfSubType("java.util.") // Allow Java lists
                 .allowIfSubType("kotlin.collections.") // Allow Kotlin collections
                 .build()
 
@@ -47,8 +48,13 @@ class RabbitMqConfig {
             )
         }
 
-        return Jackson2JsonMessageConverter(objectMapper).apply {
+        val typeMapper = DefaultJackson2JavaTypeMapper().apply {
+            setTrustedPackages("*")
             typePrecedence = Jackson2JavaTypeMapper.TypePrecedence.TYPE_ID
+        }
+
+        return Jackson2JsonMessageConverter(objectMapper).apply {
+            javaTypeMapper = typeMapper
         }
     }
 
@@ -58,7 +64,7 @@ class RabbitMqConfig {
         messageConverter: Jackson2JsonMessageConverter
     ): RabbitTemplate {
         return RabbitTemplate(connectionFactory).apply {
-            this.messageConverter = messageConverter()
+            this.messageConverter = messageConverter
         }
     }
 
@@ -78,16 +84,18 @@ class RabbitMqConfig {
     @Bean
     fun rabbitListenerContainerFactory(
         connectionFactory: ConnectionFactory,
-        transactionManager: PlatformTransactionManager
+        transactionManager: PlatformTransactionManager,
+        messageConverter: Jackson2JsonMessageConverter
     ): SimpleRabbitListenerContainerFactory {
         return SimpleRabbitListenerContainerFactory().apply {
             setConnectionFactory(connectionFactory)
             setTransactionManager(transactionManager)
             setChannelTransacted(true)
+            setMessageConverter(messageConverter)
         }
     }
 
-            @Bean
+    @Bean
     fun notificationUserEventsBinding(
         notificationUserEventsQueue: Queue,
         userExchange: TopicExchange

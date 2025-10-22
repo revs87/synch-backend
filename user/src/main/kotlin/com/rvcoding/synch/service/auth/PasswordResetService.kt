@@ -1,10 +1,12 @@
 package com.rvcoding.synch.service.auth
 
+import com.rvcoding.synch.domain.events.user.UserEvent
 import com.rvcoding.synch.domain.exception.InvalidCredentialsException
 import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.NullPasswordException
 import com.rvcoding.synch.domain.exception.SamePasswordException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
+import com.rvcoding.synch.domain.infra.message_queue.EventPublisher
 import com.rvcoding.synch.domain.model.PasswordHash.Encoded
 import com.rvcoding.synch.domain.model.PasswordHash.Null
 import com.rvcoding.synch.domain.type.UserId
@@ -28,7 +30,8 @@ class PasswordResetService(
     private val passwordResetTokenRepository: PasswordResetTokenRepository,
     private val passwordEncoder: PasswordEncoder,
     @param:Value("\${synch.rate-limit.email.reset-password.expiry-minutes}")
-    private val expiryMinutes: Long
+    private val expiryMinutes: Long,
+    private val eventPublisher: EventPublisher
 ) {
     @Transactional
     fun requestPasswordReset(email: String) {
@@ -48,7 +51,15 @@ class PasswordResetService(
         )
         passwordResetTokenRepository.save(token)
 
-        // TODO: Inform notification service about password reset trigger to send email
+        eventPublisher.publish(
+            event = UserEvent.RequestResetPassword(
+                userId = user.id!!,
+                email = user.email,
+                username = user.username,
+                passwordResetToken = token.token,
+                expiresInMinutes = expiryMinutes
+            )
+        )
     }
 
     @Transactional
