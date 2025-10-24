@@ -3,7 +3,7 @@ package com.rvcoding.synch.service.auth
 import com.rvcoding.synch.domain.events.user.UserEvent
 import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
-import com.rvcoding.synch.domain.infra.message_queue.EventPublisher
+import com.rvcoding.synch.infra.message_queue.EventPublisher
 import com.rvcoding.synch.domain.model.EmailVerificationToken
 import com.rvcoding.synch.infra.database.entities.EmailVerificationTokenEntity
 import com.rvcoding.synch.infra.database.mappers.toEmailVerificationToken

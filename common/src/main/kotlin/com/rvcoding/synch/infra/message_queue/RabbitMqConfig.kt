@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.rvcoding.synch.domain.infra.message_queue
+package com.rvcoding.synch.infra.message_queue
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator

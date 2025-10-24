@@ -1,4 +1,4 @@
-package com.rvcoding.synch.domain.infra.message_queue
+package com.rvcoding.synch.infra.message_queue
 
 import com.rvcoding.synch.domain.events.SynchEvent
 import org.slf4j.LoggerFactory

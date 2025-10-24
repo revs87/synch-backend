@@ -7,7 +7,7 @@ import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.NullPasswordException
 import com.rvcoding.synch.domain.exception.UserAlreadyExistsException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
-import com.rvcoding.synch.domain.infra.message_queue.EventPublisher
+import com.rvcoding.synch.infra.message_queue.EventPublisher
 import com.rvcoding.synch.domain.model.AuthenticatedUser
 import com.rvcoding.synch.domain.model.PasswordHash.Encoded
 import com.rvcoding.synch.domain.model.PasswordHash.Null
