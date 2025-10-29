@@ -11,7 +11,7 @@ import com.rvcoding.synch.api.dto.ResetPasswordRequest
 import com.rvcoding.synch.api.dto.UserDto
 import com.rvcoding.synch.api.mappers.toAuthenticatedUserDto
 import com.rvcoding.synch.api.mappers.toUserDto
-import com.rvcoding.synch.api.utils.requestUserId
+import com.rvcoding.synch.api.requestUserId
 import com.rvcoding.synch.infra.api.rate_limiting.EmailRateLimiter
 import com.rvcoding.synch.service.auth.AuthService
 import com.rvcoding.synch.service.auth.EmailVerificationService

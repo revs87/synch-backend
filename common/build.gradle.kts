@@ -17,6 +17,8 @@ dependencies {
     api(libs.jackson.module.kotlin)
 
     implementation(libs.spring.boot.starter.amqp)
+    implementation(libs.spring.boot.starter.security)
+
     implementation(libs.jackson.module.datatype)
 
     testImplementation(kotlin("test"))
