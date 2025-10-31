@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.rvcoding.synch.domain.events.SynchEvent
+import com.rvcoding.synch.domain.events.chat.ChatEventConstants
 import com.rvcoding.synch.domain.events.user.UserEventConstants
 import org.springframework.amqp.core.Binding
 import org.springframework.amqp.core.BindingBuilder
@@ -69,19 +70,6 @@ class RabbitMqConfig {
     }
 
     @Bean
-    fun userExchange() = TopicExchange(
-        /* name = */ UserEventConstants.USER_EXCHANGE,
-        /* durable = */ true,
-        /* autoDelete = */ false
-    )
-
-    @Bean
-    fun notificationUserEventsQueue() = Queue(
-        /* name = */ MessageQueues.NOTIFICATION_USER_EVENTS,
-        /* durable = */ true
-    )
-
-    @Bean
     fun rabbitListenerContainerFactory(
         connectionFactory: ConnectionFactory,
         transactionManager: PlatformTransactionManager,
@@ -96,12 +84,49 @@ class RabbitMqConfig {
     }
 
     @Bean
+    fun userExchange() = TopicExchange(
+        /* name = */ UserEventConstants.USER_EXCHANGE,
+        /* durable = */ true,
+        /* autoDelete = */ false
+    )
+
+    @Bean
+    fun chatExchange() = TopicExchange(
+        /* name = */ ChatEventConstants.CHAT_EXCHANGE,
+        /* durable = */ true,
+        /* autoDelete = */ false
+    )
+
+    @Bean
+    fun notificationUserEventsQueue() = Queue(
+        /* name = */ MessageQueues.NOTIFICATION_USER_EVENTS,
+        /* durable = */ true
+    )
+
+    @Bean
+    fun chatUserEventsQueue() = Queue(
+        /* name = */ MessageQueues.CHAT_USER_EVENTS,
+        /* durable = */ true
+    )
+
+    @Bean
     fun notificationUserEventsBinding(
         notificationUserEventsQueue: Queue,
         userExchange: TopicExchange
     ): Binding {
         return BindingBuilder
             .bind(notificationUserEventsQueue)
+            .to(userExchange)
+            .with("user.*")
+    }
+
+    @Bean
+    fun chatUserEventsBinding(
+        chatUserEventsQueue: Queue,
+        userExchange: TopicExchange
+    ): Binding {
+        return BindingBuilder
+            .bind(chatUserEventsQueue)
             .to(userExchange)
             .with("user.*")
     }

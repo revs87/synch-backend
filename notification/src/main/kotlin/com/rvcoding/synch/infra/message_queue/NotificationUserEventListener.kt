@@ -1,7 +1,6 @@
-package com.rvcoding.synch.infra_message_queue
+package com.rvcoding.synch.infra.message_queue
 
 import com.rvcoding.synch.domain.events.user.UserEvent
-import com.rvcoding.synch.infra.message_queue.MessageQueues
 import com.rvcoding.synch.service.EmailService
 import java.time.Duration
 import org.springframework.amqp.rabbit.annotation.RabbitListener

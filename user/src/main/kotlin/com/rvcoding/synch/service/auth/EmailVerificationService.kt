@@ -3,12 +3,12 @@ package com.rvcoding.synch.service.auth
 import com.rvcoding.synch.domain.events.user.UserEvent
 import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
-import com.rvcoding.synch.infra.message_queue.EventPublisher
 import com.rvcoding.synch.domain.model.EmailVerificationToken
 import com.rvcoding.synch.infra.database.entities.EmailVerificationTokenEntity
 import com.rvcoding.synch.infra.database.mappers.toEmailVerificationToken
 import com.rvcoding.synch.infra.database.repositories.EmailVerificationTokenRepository
 import com.rvcoding.synch.infra.database.repositories.UserRepository
+import com.rvcoding.synch.infra.message_queue.EventPublisher
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import org.springframework.beans.factory.annotation.Value
@@ -75,6 +75,14 @@ class EmailVerificationService(
         )
         userRepository.save(
             verificationToken.user.apply { hasVerifiedEmail = true }
+        )
+
+        eventPublisher.publish(
+            event = UserEvent.Verified(
+                userId = verificationToken.user.id!!,
+                email = verificationToken.user.email,
+                username = verificationToken.user.username
+            )
         )
     }
 
