@@ -2,7 +2,7 @@ package com.rvcoding.synch.api.controller
 
 import com.rvcoding.synch.api.dto.ChatParticipantDto
 import com.rvcoding.synch.api.mappers.toChatParticipantDto
-import com.rvcoding.synch.api.requestUserId
+import com.rvcoding.synch.api.util.requestUserId
 import com.rvcoding.synch.service.ChatParticipantService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping

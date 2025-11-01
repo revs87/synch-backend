@@ -1,4 +1,4 @@
-package com.rvcoding.synch.api
+package com.rvcoding.synch.api.util
 
 import com.rvcoding.synch.domain.exception.UnauthorizedException
 import com.rvcoding.synch.domain.type.UserId

@@ -1,7 +1,5 @@
 package com.rvcoding.synch.service
 
-import com.rvcoding.synch.api.dto.ChatMessageDto
-import com.rvcoding.synch.api.mappers.toChatMessageDto
 import com.rvcoding.synch.domain.exception.ChatNotFoundException
 import com.rvcoding.synch.domain.exception.ChatParticipantNotFoundException
 import com.rvcoding.synch.domain.exception.ForbiddenException
@@ -17,7 +15,6 @@ import com.rvcoding.synch.infra.database.repositories.ChatMessageRepository
 import com.rvcoding.synch.infra.database.repositories.ChatParticipantRepository
 import com.rvcoding.synch.infra.database.repositories.ChatRepository
 import java.time.Instant
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -28,22 +25,6 @@ class ChatMessageService(
     private val chatMessageRepository: ChatMessageRepository,
     private val chatParticipantRepository: ChatParticipantRepository
 ) {
-
-    fun getChatMessages(
-        chatId: ChatId,
-        before: Instant?,
-        pageSize: Int
-    ): List<ChatMessageDto> {
-        return chatMessageRepository
-            .findByChatIdBefore(
-                chatId = chatId,
-                before = before ?: Instant.now(),
-                pageable = PageRequest.of(0, pageSize)
-            )
-            .content
-            .asReversed()
-            .map { it.toChatMessage().toChatMessageDto() }
-    }
 
     @Transactional
     fun sendMessage(
