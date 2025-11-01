@@ -6,6 +6,7 @@ import com.rvcoding.synch.domain.exception.ChatNotFoundException
 import com.rvcoding.synch.domain.exception.ChatParticipantNotFoundException
 import com.rvcoding.synch.domain.exception.ForbiddenException
 import com.rvcoding.synch.domain.exception.MessageNotFoundException
+import com.rvcoding.synch.domain.exception.MessageNotUpdatableException
 import com.rvcoding.synch.domain.models.ChatMessage
 import com.rvcoding.synch.domain.type.ChatId
 import com.rvcoding.synch.domain.type.ChatMessageId
@@ -67,6 +68,28 @@ class ChatMessageService(
         )
 
         return savedMessage.toChatMessage()
+    }
+
+    @Transactional
+    fun updateMessage(
+        messageId: ChatMessageId,
+        senderId: UserId,
+        content: String
+    ): ChatMessage {
+        val message = chatMessageRepository.findByIdOrNull(messageId)
+            ?: throw MessageNotFoundException(messageId)
+        if (message.sender.userId != senderId) {
+            throw ForbiddenException()
+        }
+        val expired = Instant.now().minusSeconds(15 * 60)  // 15mins to update the message since creation datetime
+            .isAfter(message.createdAt)
+        if (expired) {
+            throw MessageNotUpdatableException(messageId)
+        }
+
+        message.content = content
+
+        return chatMessageRepository.save(message).toChatMessage()
     }
 
     @Transactional
