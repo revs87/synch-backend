@@ -2,6 +2,8 @@ package com.rvcoding.synch.service
 
 import com.rvcoding.synch.api.dto.ChatMessageDto
 import com.rvcoding.synch.api.mappers.toChatMessageDto
+import com.rvcoding.synch.domain.event.ChatParticipantLeftEvent
+import com.rvcoding.synch.domain.event.ChatParticipantsJoinedEvent
 import com.rvcoding.synch.domain.exception.ChatNotFoundException
 import com.rvcoding.synch.domain.exception.ChatParticipantNotFoundException
 import com.rvcoding.synch.domain.exception.ForbiddenException
@@ -17,6 +19,7 @@ import com.rvcoding.synch.infra.database.repositories.ChatMessageRepository
 import com.rvcoding.synch.infra.database.repositories.ChatParticipantRepository
 import com.rvcoding.synch.infra.database.repositories.ChatRepository
 import java.time.Instant
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -27,6 +30,7 @@ class ChatService(
     private val chatRepository: ChatRepository,
     private val chatParticipantRepository: ChatParticipantRepository,
     private val chatMessageRepository: ChatMessageRepository,
+    private val applicationEventPublisher: ApplicationEventPublisher
 ) {
 
     fun getChatMessages(
@@ -98,6 +102,13 @@ class ChatService(
             }
         ).toChat(lastMessage)
 
+        applicationEventPublisher.publishEvent(
+            ChatParticipantsJoinedEvent(
+                chatId = chatId,
+                userIds = userIds
+            )
+        )
+
         return updatedChat
     }
 
@@ -122,6 +133,13 @@ class ChatService(
             chat.apply {
                 this.participants = chat.participants - participant
             }
+        )
+
+        applicationEventPublisher.publishEvent(
+            ChatParticipantLeftEvent(
+                chatId = chatId,
+                userId = userId
+            )
         )
     }
 
