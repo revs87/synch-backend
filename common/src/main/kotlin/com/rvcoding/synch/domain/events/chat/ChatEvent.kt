@@ -2,6 +2,7 @@ package com.rvcoding.synch.domain.events.chat
 
 import com.rvcoding.synch.domain.events.SynchEvent
 import com.rvcoding.synch.domain.type.ChatId
+import com.rvcoding.synch.domain.type.ChatMessageId
 import com.rvcoding.synch.domain.type.UserId
 import java.time.Instant
 import java.util.UUID
@@ -19,5 +20,12 @@ sealed class ChatEvent(
         val chatId: ChatId,
         val message: String,
         override val eventKey: String = ChatEventConstants.CHAT_NEW_MESSAGE
+    ) : ChatEvent(), SynchEvent
+
+    data class UpdatedMessage(
+        val senderId: UserId,
+        val chatMessageId: ChatMessageId,
+        val message: String,
+        override val eventKey: String = ChatEventConstants.CHAT_UPDATED_MESSAGE
     ) : ChatEvent(), SynchEvent
 }

@@ -71,22 +71,35 @@ class ChatMessageService(
     fun updateMessage(
         messageId: ChatMessageId,
         senderId: UserId,
-        content: String
+        newContent: String
     ): ChatMessage {
         val message = chatMessageRepository.findByIdOrNull(messageId)
             ?: throw MessageNotFoundException(messageId)
+        val sender = chatParticipantRepository.findByIdOrNull(senderId)
+            ?: throw ChatParticipantNotFoundException(senderId)
         if (message.sender.userId != senderId) {
             throw ForbiddenException()
         }
-        val expired = Instant.now().minusSeconds(15 * 60)  // 15mins to update the message since creation datetime
-            .isAfter(message.createdAt)
-        if (expired) {
+        val updatable = Instant.now()
+            .minusSeconds(MESSAGE_UPDATABLE_TIME_IN_SECONDS)
+            .isBefore(message.createdAt)
+        if (!updatable) {
             throw MessageNotUpdatableException(messageId)
         }
 
-        message.content = content
+        message.content = newContent.trim()
 
-        return chatMessageRepository.save(message).toChatMessage()
+        val savedMessage = chatMessageRepository.saveAndFlush(message)
+
+        eventPublisher.publish(
+            event = ChatEvent.UpdatedMessage(
+                senderId = sender.userId,
+                chatMessageId = savedMessage.id!!,
+                message = savedMessage.content
+            )
+        )
+
+        return savedMessage.toChatMessage()
     }
 
     @Transactional
@@ -109,5 +122,9 @@ class ChatMessageService(
                 messageId = messageId
             )
         )
+    }
+
+    companion object {
+        const val MESSAGE_UPDATABLE_TIME_IN_SECONDS = 15 * 60L // 15 minutes to update the message since its creation datetime
     }
 }
