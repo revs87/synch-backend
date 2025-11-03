@@ -1,4 +1,4 @@
-package com.rvcoding.synch.security
+package com.rvcoding.synch.api.security
 
 import com.rvcoding.synch.api.security.JwtAuthFilter
 import jakarta.servlet.DispatcherType

@@ -14,6 +14,8 @@ dependencies {
     implementation(projects.user)
     implementation(projects.chat)
 
+    implementation(libs.jackson.module.datatype)
+    implementation(libs.kotlin.reflect)
     implementation(libs.spring.boot.starter.security)
 
     implementation(libs.spring.boot.starter.mail)
