@@ -1,4 +1,4 @@
-package com.rvcoding.synch.service.auth
+package com.rvcoding.synch.service
 
 import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.type.UserId
@@ -30,6 +30,7 @@ class JwtService(
             expiry = accessTokenValidityMs
         )
     }
+
     fun generateRefreshToken(userId: UserId): String {
         return generateToken(
             userId = userId,
@@ -37,6 +38,7 @@ class JwtService(
             expiry = refreshTokenValidityMs
         )
     }
+
     fun validateAccessToken(token: String) = validateToken(token, "access")
     fun validateRefreshToken(token: String) = validateToken(token, "refresh")
     fun getUserIdFromToken(token: String): UserId {

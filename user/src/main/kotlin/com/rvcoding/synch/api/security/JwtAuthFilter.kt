@@ -1,6 +1,6 @@
 package com.rvcoding.synch.api.security
 
-import com.rvcoding.synch.service.auth.JwtService
+import com.rvcoding.synch.service.JwtService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

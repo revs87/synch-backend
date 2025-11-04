@@ -6,7 +6,6 @@ import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.NullPasswordException
 import com.rvcoding.synch.domain.exception.SamePasswordException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
-import com.rvcoding.synch.infra.message_queue.EventPublisher
 import com.rvcoding.synch.domain.model.PasswordHash.Encoded
 import com.rvcoding.synch.domain.model.PasswordHash.Null
 import com.rvcoding.synch.domain.type.UserId
@@ -14,6 +13,7 @@ import com.rvcoding.synch.infra.database.entities.PasswordResetTokenEntity
 import com.rvcoding.synch.infra.database.repositories.PasswordResetTokenRepository
 import com.rvcoding.synch.infra.database.repositories.RefreshTokenRepository
 import com.rvcoding.synch.infra.database.repositories.UserRepository
+import com.rvcoding.synch.infra.message_queue.EventPublisher
 import com.rvcoding.synch.infra.security.PasswordEncoder
 import java.time.Instant
 import java.time.temporal.ChronoUnit
