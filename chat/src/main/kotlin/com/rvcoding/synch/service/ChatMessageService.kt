@@ -30,7 +30,8 @@ class ChatMessageService(
     private val chatMessageRepository: ChatMessageRepository,
     private val chatParticipantRepository: ChatParticipantRepository,
     private val applicationEventPublisher: ApplicationEventPublisher, // Internal events
-    private val eventPublisher: EventPublisher // RabbitMQ events
+    private val eventPublisher: EventPublisher, // RabbitMQ events,
+    private val messageCacheEvictionHelper: MessageCacheEvictionHelper
 ) {
 
     @Transactional
@@ -137,12 +138,9 @@ class ChatMessageService(
             )
         )
 
-        evictMessagesCache(message.chatId)
+        messageCacheEvictionHelper.evictMessagesCache(message.chatId)
     }
 
-    fun evictMessagesCache(chatId: ChatId) {
-        // NO-OP: Let Spring handle the cache evict
-    }
 
     companion object {
         const val MESSAGE_MUTABILITY_TIME_IN_SECONDS = 15 * 60L // 15 minutes to update the message since its creation datetime
