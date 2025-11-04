@@ -5,8 +5,8 @@ import com.rvcoding.synch.domain.events.chat.ChatEvent
 import com.rvcoding.synch.domain.exception.ChatNotFoundException
 import com.rvcoding.synch.domain.exception.ChatParticipantNotFoundException
 import com.rvcoding.synch.domain.exception.ForbiddenException
+import com.rvcoding.synch.domain.exception.MessageImmutableException
 import com.rvcoding.synch.domain.exception.MessageNotFoundException
-import com.rvcoding.synch.domain.exception.MessageNotUpdatableException
 import com.rvcoding.synch.domain.models.ChatMessage
 import com.rvcoding.synch.domain.type.ChatId
 import com.rvcoding.synch.domain.type.ChatMessageId
@@ -18,6 +18,7 @@ import com.rvcoding.synch.infra.database.repositories.ChatParticipantRepository
 import com.rvcoding.synch.infra.database.repositories.ChatRepository
 import com.rvcoding.synch.infra.message_queue.EventPublisher
 import java.time.Instant
+import org.springframework.cache.annotation.CacheEvict
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -33,6 +34,10 @@ class ChatMessageService(
 ) {
 
     @Transactional
+    @CacheEvict(
+        value = ["messages"],
+        key = "#chatId"
+    )
     fun sendMessage(
         chatId: ChatId,
         senderId: UserId,
@@ -68,6 +73,10 @@ class ChatMessageService(
     }
 
     @Transactional
+    @CacheEvict(
+        value = ["messages"],
+        key = "#chatId"
+    )
     fun updateMessage(
         messageId: ChatMessageId,
         senderId: UserId,
@@ -81,10 +90,10 @@ class ChatMessageService(
             throw ForbiddenException()
         }
         val updatable = Instant.now()
-            .minusSeconds(MESSAGE_UPDATABLE_TIME_IN_SECONDS)
+            .minusSeconds(MESSAGE_MUTABILITY_TIME_IN_SECONDS)
             .isBefore(message.createdAt)
         if (!updatable) {
-            throw MessageNotUpdatableException(messageId)
+            throw MessageImmutableException(messageId)
         }
 
         message.content = newContent.trim()
@@ -109,9 +118,14 @@ class ChatMessageService(
     ) {
         val message = chatMessageRepository.findByIdOrNull(messageId)
             ?: throw MessageNotFoundException(messageId)
-
         if (message.sender.userId != requestUserId) {
             throw ForbiddenException()
+        }
+        val deletable = Instant.now()
+            .minusSeconds(MESSAGE_MUTABILITY_TIME_IN_SECONDS)
+            .isBefore(message.createdAt)
+        if (!deletable) {
+            throw MessageImmutableException(messageId)
         }
 
         chatMessageRepository.delete(message)
@@ -122,9 +136,15 @@ class ChatMessageService(
                 messageId = messageId
             )
         )
+
+        evictMessagesCache(message.chatId)
+    }
+
+    fun evictMessagesCache(chatId: ChatId) {
+        // NO-OP: Let Spring handle the cache evict
     }
 
     companion object {
-        const val MESSAGE_UPDATABLE_TIME_IN_SECONDS = 15 * 60L // 15 minutes to update the message since its creation datetime
+        const val MESSAGE_MUTABILITY_TIME_IN_SECONDS = 15 * 60L // 15 minutes to update the message since its creation datetime
     }
 }

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
-import com.rvcoding.synch.domain.events.SynchEvent
 import com.rvcoding.synch.domain.events.chat.ChatEventConstants
 import com.rvcoding.synch.domain.events.user.UserEventConstants
 import org.springframework.amqp.core.Binding
@@ -38,9 +37,9 @@ class RabbitMqConfig {
 
             // Introduces the ability to serialize all classes that implement the interface SynchEvent
             val polymorphicTypeValidator = BasicPolymorphicTypeValidator.builder()
-                .allowIfBaseType(SynchEvent::class.java)
                 .allowIfSubType("java.util.") // Allow Java lists
                 .allowIfSubType("kotlin.collections.") // Allow Kotlin collections
+                .allowIfSubType("com.rvcoding.synch.")
                 .build()
 
             activateDefaultTyping(

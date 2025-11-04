@@ -4,7 +4,7 @@ import com.rvcoding.synch.domain.exception.ChatNotFoundException
 import com.rvcoding.synch.domain.exception.ChatParticipantNotFoundException
 import com.rvcoding.synch.domain.exception.InvalidChatSizeException
 import com.rvcoding.synch.domain.exception.MessageNotFoundException
-import com.rvcoding.synch.domain.exception.MessageNotUpdatableException
+import com.rvcoding.synch.domain.exception.MessageImmutableException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -31,9 +31,9 @@ class ChatExceptionHandler {
         "message" to e.message
     )
 
-    @ExceptionHandler(MessageNotUpdatableException::class)
+    @ExceptionHandler(MessageImmutableException::class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    fun onForbidden(e: MessageNotUpdatableException) = mapOf(
+    fun onForbidden(e: MessageImmutableException) = mapOf(
         "code" to "FORBIDDEN_UPDATE",
         "message" to e.message
     )
