@@ -9,6 +9,7 @@ import com.rvcoding.synch.api.dto.ws.IncomingWebSocketMessageType
 import com.rvcoding.synch.api.dto.ws.OutgoingWebSocketMessage
 import com.rvcoding.synch.api.dto.ws.OutgoingWebSocketMessageType
 import com.rvcoding.synch.api.dto.ws.SendMessageDto
+import com.rvcoding.synch.api.dto.ws.UpdatedMessageDto
 import com.rvcoding.synch.api.mappers.toChatMessageDto
 import com.rvcoding.synch.domain.type.ChatId
 import com.rvcoding.synch.domain.type.UserId
@@ -116,6 +117,16 @@ class ChatWebSocketHandler(
                         senderId = userSession.userId
                     )
                 }
+                IncomingWebSocketMessageType.MESSAGE_UPDATED -> {
+                    val dto = objectMapper.readValue(
+                        /* content = */ webSocketMessage.payload,
+                        /* valueType = */ UpdatedMessageDto::class.java
+                    )
+                    handleUpdateMessage(
+                        dto = dto,
+                        senderId = userSession.userId
+                    )
+                }
                 else -> {}
             }
         } catch (e: JsonMappingException) {
@@ -172,14 +183,17 @@ class ChatWebSocketHandler(
         dto: SendMessageDto,
         senderId: UserId
     ) {
+        // retrieve all chats from user
         val userChatIds = connectionLock.read {
             this@ChatWebSocketHandler.userChatIds[senderId]
         } ?: return
 
+        // verify if chat of the message exists in user chats
         if (dto.chatId !in userChatIds) {
             return
         }
 
+        // save and publish
         val savedMessage = chatMessageService.sendMessage(
             chatId = dto.chatId,
             senderId = senderId,
@@ -187,12 +201,41 @@ class ChatWebSocketHandler(
             messageId = dto.messageId
         )
 
+        // update all users in chat
         broadcastToChat(
             chatId = dto.chatId,
             message = OutgoingWebSocketMessage(
                 type = OutgoingWebSocketMessageType.NEW_MESSAGE,
                 payload = objectMapper.writeValueAsString(
                     savedMessage.toChatMessageDto()
+                )
+            )
+        )
+    }
+
+    private fun handleUpdateMessage(
+        dto: UpdatedMessageDto,
+        senderId: UserId
+    ) {
+        val userChatIds = connectionLock.read {
+            this@ChatWebSocketHandler.userChatIds[senderId]
+        } ?: return
+        if (dto.chatId !in userChatIds) {
+            return
+        }
+
+        val updatedMessage = chatMessageService.updateMessage(
+            senderId = senderId,
+            messageId = dto.messageId,
+            newContent = dto.content
+        )
+
+        broadcastToChat(
+            chatId = dto.chatId,
+            message = OutgoingWebSocketMessage(
+                type = OutgoingWebSocketMessageType.MESSAGE_UPDATED,
+                payload = objectMapper.writeValueAsString(
+                    updatedMessage.toChatMessageDto()
                 )
             )
         )
