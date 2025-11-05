@@ -3,10 +3,10 @@ package com.rvcoding.synch.service.auth
 import com.rvcoding.synch.domain.events.user.UserEvent
 import com.rvcoding.synch.domain.exception.EmailNotVerifiedException
 import com.rvcoding.synch.domain.exception.InvalidCredentialsException
+import com.rvcoding.synch.domain.exception.InvalidTokenException
 import com.rvcoding.synch.domain.exception.NullPasswordException
 import com.rvcoding.synch.domain.exception.UserAlreadyExistsException
 import com.rvcoding.synch.domain.exception.UserNotFoundException
-import com.rvcoding.synch.infra.message_queue.EventPublisher
 import com.rvcoding.synch.domain.model.AuthenticatedUser
 import com.rvcoding.synch.domain.model.PasswordHash.Encoded
 import com.rvcoding.synch.domain.model.PasswordHash.Null
@@ -17,6 +17,7 @@ import com.rvcoding.synch.infra.database.entities.UserEntity
 import com.rvcoding.synch.infra.database.mappers.toUser
 import com.rvcoding.synch.infra.database.repositories.RefreshTokenRepository
 import com.rvcoding.synch.infra.database.repositories.UserRepository
+import com.rvcoding.synch.infra.message_queue.EventPublisher
 import com.rvcoding.synch.infra.security.PasswordEncoder
 import com.rvcoding.synch.service.JwtService
 import java.security.MessageDigest
