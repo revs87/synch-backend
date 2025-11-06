@@ -19,3 +19,5 @@ synch:
   rate-limit:
     ip:
       apply-limit: true
+  web-socket:
+    allowed-origin: "https://synch.rvcoding.com"

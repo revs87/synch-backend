@@ -3,6 +3,8 @@ package com.rvcoding.synch.api.websocket
 
 import com.fasterxml.jackson.databind.JsonMappingException
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.rvcoding.synch.api.dto.ws.ChatParticipantsChangedDto
 import com.rvcoding.synch.api.dto.ws.DeleteMessageDto
 import com.rvcoding.synch.api.dto.ws.ErrorDto
@@ -49,6 +51,9 @@ class ChatWebSocketHandler(
     private val jwtService: JwtService
 ) : TextWebSocketHandler() {
 
+    private val mapper = objectMapper
+        .registerModule(JavaTimeModule())
+        .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
     private val logger = LoggerFactory.getLogger(javaClass)
 
     private val connectionLock = ReentrantReadWriteLock()
@@ -102,6 +107,35 @@ class ChatWebSocketHandler(
         }
 
         logger.info("Websocket connection established for user $userId")
+    }
+
+    override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
+        connectionLock.write {
+            sessions.remove(session.id)?.let { userSession ->
+                val userId = userSession.userId
+
+                userToSessions.compute(userId) { _, sessions ->
+                    sessions
+                        ?.apply { remove(session.id) }
+                        ?.takeIf { it.isNotEmpty() }
+                }
+
+                userChatIds[userId]?.forEach { chatId ->
+                    chatToSessions.compute(chatId) { _, sessions ->
+                        sessions
+                            ?.apply { remove(session.id) }
+                            ?.takeIf { it.isNotEmpty() }
+                    }
+                }
+
+                logger.info("Websocket session closed for user $userId")
+            }
+        }
+    }
+
+    override fun handleTransportError(session: WebSocketSession, exception: Throwable) {
+        logger.error("Transport error for session ${session.id}", exception)
+        session.close(CloseStatus.SERVER_ERROR.withReason("Transport error"))
     }
 
     override fun handlePongMessage(session: WebSocketSession, message: PongMessage) {
@@ -162,13 +196,13 @@ class ChatWebSocketHandler(
         }
 
         try {
-            val webSocketMessage = objectMapper.readValue(
+            val webSocketMessage = mapper.readValue(
                 /* content = */ message.payload,
                 /* valueType = */ IncomingWebSocketMessage::class.java
             )
             when (webSocketMessage.type) {
                 IncomingWebSocketMessageType.NEW_MESSAGE -> {
-                    val dto = objectMapper.readValue(
+                    val dto = mapper.readValue(
                         /* content = */ webSocketMessage.payload,
                         /* valueType = */ SendMessageDto::class.java
                     )
@@ -178,7 +212,7 @@ class ChatWebSocketHandler(
                     )
                 }
                 IncomingWebSocketMessageType.MESSAGE_UPDATED -> {
-                    val dto = objectMapper.readValue(
+                    val dto = mapper.readValue(
                         /* content = */ webSocketMessage.payload,
                         /* valueType = */ UpdatedMessageDto::class.java
                     )
@@ -207,7 +241,7 @@ class ChatWebSocketHandler(
             chatId = event.chatId,
             message = OutgoingWebSocketMessage(
                 type = OutgoingWebSocketMessageType.MESSAGE_DELETED,
-                payload = objectMapper.writeValueAsString(
+                payload = mapper.writeValueAsString(
                     DeleteMessageDto(
                         chatId = event.chatId,
                         messageId = event.messageId
@@ -241,7 +275,7 @@ class ChatWebSocketHandler(
             chatId = event.chatId,
             message = OutgoingWebSocketMessage(
                 type = OutgoingWebSocketMessageType.CHAT_PARTICIPANTS_CHANGED,
-                payload = objectMapper.writeValueAsString(
+                payload = mapper.writeValueAsString(
                     ChatParticipantsChangedDto(
                         chatId = event.chatId
                     )
@@ -272,7 +306,7 @@ class ChatWebSocketHandler(
             chatId = event.chatId,
             message = OutgoingWebSocketMessage(
                 type = OutgoingWebSocketMessageType.CHAT_PARTICIPANTS_CHANGED,
-                payload = objectMapper.writeValueAsString(
+                payload = mapper.writeValueAsString(
                     ChatParticipantsChangedDto(
                         chatId = event.chatId
                     )
@@ -285,10 +319,10 @@ class ChatWebSocketHandler(
         session: WebSocketSession,
         error: ErrorDto
     ) {
-        val webSocketMessage = objectMapper.writeValueAsString(
+        val webSocketMessage = mapper.writeValueAsString(
             OutgoingWebSocketMessage(
                 type = OutgoingWebSocketMessageType.ERROR,
-                payload = objectMapper.writeValueAsString(error)
+                payload = mapper.writeValueAsString(error)
             )
         )
 
@@ -346,7 +380,7 @@ class ChatWebSocketHandler(
             chatId = dto.chatId,
             message = OutgoingWebSocketMessage(
                 type = OutgoingWebSocketMessageType.NEW_MESSAGE,
-                payload = objectMapper.writeValueAsString(
+                payload = mapper.writeValueAsString(
                     savedMessage.toChatMessageDto()
                 )
             )
@@ -374,7 +408,7 @@ class ChatWebSocketHandler(
             chatId = dto.chatId,
             message = OutgoingWebSocketMessage(
                 type = OutgoingWebSocketMessageType.MESSAGE_UPDATED,
-                payload = objectMapper.writeValueAsString(
+                payload = mapper.writeValueAsString(
                     updatedMessage.toChatMessageDto()
                 )
             )
@@ -394,7 +428,7 @@ class ChatWebSocketHandler(
             }
             if (userSession.session.isOpen) {
                 try {
-                    val messageJson = objectMapper.writeValueAsString(message)
+                    val messageJson = mapper.writeValueAsString(message)
                     userSession.session.sendMessage(TextMessage(messageJson))
                     logger.debug("Sent message to user {}: {}", userId, messageJson)
                 } catch (e: Exception) {
