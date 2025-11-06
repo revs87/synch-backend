@@ -15,6 +15,7 @@ import com.rvcoding.synch.api.dto.ws.OutgoingWebSocketMessageType
 import com.rvcoding.synch.api.dto.ws.SendMessageDto
 import com.rvcoding.synch.api.dto.ws.UpdatedMessageDto
 import com.rvcoding.synch.api.mappers.toChatMessageDto
+import com.rvcoding.synch.domain.event.ChatCreatedEvent
 import com.rvcoding.synch.domain.event.ChatParticipantLeftEvent
 import com.rvcoding.synch.domain.event.ChatParticipantsJoinedEvent
 import com.rvcoding.synch.domain.event.MessageDeletedEvent
@@ -251,25 +252,41 @@ class ChatWebSocketHandler(
         )
     }
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    fun onJoinChat(event: ChatParticipantsJoinedEvent) {
+    private fun updateChatForUsers(
+        chatId: ChatId,
+        userIds: List<UserId>
+    ) {
         connectionLock.write {
-            event.userIds.forEach { userId ->
+            userIds.forEach { userId ->
                 userChatIds.compute(userId) { _, chatIds ->
                     (chatIds ?: mutableSetOf()).apply {
-                        add(event.chatId)
+                        add(chatId)
                     }
                 }
 
                 userToSessions[userId]?.forEach { sessionId ->
-                    chatToSessions.compute(event.chatId) { _, sessions ->
-                        (sessions ?: mutableSetOf()).apply {
-                            add(sessionId)
-                        }
+                    chatToSessions.compute(chatId) { _, sessions ->
+                        (sessions ?: mutableSetOf()).apply { add(sessionId) }
                     }
                 }
             }
         }
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    fun onChatCreated(event: ChatCreatedEvent) {
+        updateChatForUsers(
+            chatId = event.chatId,
+            userIds = event.participantIds
+        )
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    fun onJoinChat(event: ChatParticipantsJoinedEvent) {
+        updateChatForUsers(
+            chatId = event.chatId,
+            userIds = event.userIds.toList()
+        )
 
         broadcastToChat(
             chatId = event.chatId,

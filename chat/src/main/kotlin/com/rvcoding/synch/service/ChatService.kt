@@ -2,6 +2,7 @@ package com.rvcoding.synch.service
 
 import com.rvcoding.synch.api.dto.ChatMessageDto
 import com.rvcoding.synch.api.mappers.toChatMessageDto
+import com.rvcoding.synch.domain.event.ChatCreatedEvent
 import com.rvcoding.synch.domain.event.ChatParticipantLeftEvent
 import com.rvcoding.synch.domain.event.ChatParticipantsJoinedEvent
 import com.rvcoding.synch.domain.exception.ChatNotFoundException
@@ -96,12 +97,21 @@ class ChatService(
         val creator = chatParticipantRepository.findByIdOrNull(creatorId)
             ?: throw ChatParticipantNotFoundException(creatorId)
 
-        return chatRepository.save(
+        return chatRepository.saveAndFlush(
             ChatEntity(
                 creator = creator,
                 participants = setOf(creator) + otherParticipants
             )
-        ).toChat(lastMessage = null)
+        )
+            .toChat(lastMessage = null)
+            .also { chat ->
+                applicationEventPublisher.publishEvent(
+                    ChatCreatedEvent(
+                        chatId = chat.id,
+                        participantIds = chat.participants.map { it.userId }
+                    )
+                )
+            }
     }
 
     @Transactional
