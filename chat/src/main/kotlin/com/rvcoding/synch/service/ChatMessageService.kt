@@ -18,6 +18,7 @@ import com.rvcoding.synch.infra.database.repositories.ChatParticipantRepository
 import com.rvcoding.synch.infra.database.repositories.ChatRepository
 import com.rvcoding.synch.infra.message_queue.EventPublisher
 import java.time.Instant
+import java.util.UUID
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.repository.findByIdOrNull
@@ -52,7 +53,7 @@ class ChatMessageService(
 
         val savedMessage = chatMessageRepository.saveAndFlush(
             ChatMessageEntity(
-                id = messageId,
+                id = messageId ?: UUID.randomUUID(), // Can't be null - StaleObjectException fix
                 content = content.trim(),
                 chatId = chatId,
                 chat = chat,
