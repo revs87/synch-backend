@@ -21,6 +21,7 @@ import com.rvcoding.synch.domain.event.ChatParticipantLeftEvent
 import com.rvcoding.synch.domain.event.ChatParticipantsJoinedEvent
 import com.rvcoding.synch.domain.event.MessageDeletedEvent
 import com.rvcoding.synch.domain.event.ProfilePictureUpdatedEvent
+import com.rvcoding.synch.domain.exception.MessageImmutableException
 import com.rvcoding.synch.domain.type.ChatId
 import com.rvcoding.synch.domain.type.UserId
 import com.rvcoding.synch.service.ChatMessageService
@@ -214,7 +215,7 @@ class ChatWebSocketHandler(
                         senderId = userSession.userId
                     )
                 }
-                IncomingWebSocketMessageType.MESSAGE_UPDATED -> {
+                IncomingWebSocketMessageType.UPDATE_MESSAGE -> {
                     val dto = mapper.readValue(
                         /* content = */ webSocketMessage.payload,
                         /* valueType = */ UpdatedMessageDto::class.java
@@ -224,7 +225,6 @@ class ChatWebSocketHandler(
                         senderId = userSession.userId
                     )
                 }
-                else -> {}
             }
         } catch (e: JsonMappingException) {
             logger.warn("Could not parse message ${message.payload}", e)
@@ -457,21 +457,27 @@ class ChatWebSocketHandler(
             return
         }
 
-        val updatedMessage = chatMessageService.updateMessage(
-            senderId = senderId,
-            messageId = dto.messageId,
-            newContent = dto.content
-        )
+        try {
+            val updatedMessage = chatMessageService.updateMessage(
+                senderId = senderId,
+                messageId = dto.messageId,
+                content = dto.content
+            )
 
-        broadcastToChat(
-            chatId = dto.chatId,
-            message = OutgoingWebSocketMessage(
-                type = OutgoingWebSocketMessageType.MESSAGE_UPDATED,
-                payload = mapper.writeValueAsString(
-                    updatedMessage.toChatMessageDto()
+            broadcastToChat(
+                chatId = dto.chatId,
+                message = OutgoingWebSocketMessage(
+                    type = OutgoingWebSocketMessageType.MESSAGE_UPDATED,
+                    payload = mapper.writeValueAsString(
+                        updatedMessage.toChatMessageDto()
+                    )
                 )
             )
-        )
+        } catch (mix: MessageImmutableException) {
+            logger.warn("Couldn't update message: {}", mix.message)
+        } catch (e: Exception) {
+            throw e
+        }
     }
 
     private fun sendToUser(

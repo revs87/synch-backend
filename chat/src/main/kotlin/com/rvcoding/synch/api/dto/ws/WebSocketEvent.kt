@@ -3,7 +3,7 @@ package com.rvcoding.synch.api.dto.ws
 
 enum class IncomingWebSocketMessageType {
     NEW_MESSAGE,
-    MESSAGE_UPDATED
+    UPDATE_MESSAGE
 }
 
 enum class OutgoingWebSocketMessageType {

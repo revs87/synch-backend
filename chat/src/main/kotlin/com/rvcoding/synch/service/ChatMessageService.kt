@@ -77,12 +77,12 @@ class ChatMessageService(
     @Transactional
     @CacheEvict(
         value = ["messages"],
-        key = "#chatId"
+        key = "#messageId"
     )
     fun updateMessage(
         messageId: ChatMessageId,
         senderId: UserId,
-        newContent: String
+        content: String
     ): ChatMessage {
         val message = chatMessageRepository.findByIdOrNull(messageId)
             ?: throw MessageNotFoundException(messageId)
@@ -98,7 +98,7 @@ class ChatMessageService(
             throw MessageImmutableException(messageId)
         }
 
-        message.content = newContent.trim()
+        message.content = content.trim()
 
         val savedMessage = chatMessageRepository.saveAndFlush(message)
 
