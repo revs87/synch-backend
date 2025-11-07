@@ -94,5 +94,5 @@ nginx:
     - "10.0.0.5/32" # nginx server IP (if separate machince)
 
 supabase:
-  url: "db.lqrtwfeiapcybhlfcggz.supabase.co"
+  url: "https://lqrtwfeiapcybhlfcggz.supabase.co"
   service-key: ${SUPABASE_SERVICE_KEY}
