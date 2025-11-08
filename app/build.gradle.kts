@@ -1,3 +1,5 @@
+import org.springframework.boot.gradle.tasks.bundling.BootJar
+
 plugins {
     id("synch.spring-boot-app")
     id("org.springframework.boot")
@@ -7,6 +9,17 @@ plugins {
 group = "com.rvcoding"
 version = "0.0.1-SNAPSHOT"
 description = "Synch Backend for users, notifications and chats"
+
+tasks {
+    named<BootJar>("bootJar") {
+        from(project(":notification").projectDir.resolve("src/main/resources")) {
+            into("")
+        }
+        from(project(":user").projectDir.resolve("src/main/resources")) {
+            into("")
+        }
+    }
+}
 
 dependencies {
     implementation(projects.common)
