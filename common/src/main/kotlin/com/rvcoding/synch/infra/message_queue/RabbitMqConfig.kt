@@ -82,32 +82,18 @@ class RabbitMqConfig {
         }
     }
 
-    @Bean
-    fun userExchange() = TopicExchange(
-        /* name = */ UserEventConstants.USER_EXCHANGE,
-        /* durable = */ true,
-        /* autoDelete = */ false
-    )
-
-    @Bean
-    fun chatExchange() = TopicExchange(
-        /* name = */ ChatEventConstants.CHAT_EXCHANGE,
-        /* durable = */ true,
-        /* autoDelete = */ false
-    )
 
     @Bean
     fun notificationUserEventsQueue() = Queue(
         /* name = */ MessageQueues.NOTIFICATION_USER_EVENTS,
         /* durable = */ true
     )
-
     @Bean
-    fun chatUserEventsQueue() = Queue(
-        /* name = */ MessageQueues.CHAT_USER_EVENTS,
-        /* durable = */ true
+    fun userExchange() = TopicExchange(
+        /* name = */ UserEventConstants.USER_EXCHANGE,
+        /* durable = */ true,
+        /* autoDelete = */ false
     )
-
     @Bean
     fun notificationUserEventsBinding(
         notificationUserEventsQueue: Queue,
@@ -116,9 +102,15 @@ class RabbitMqConfig {
         return BindingBuilder
             .bind(notificationUserEventsQueue)
             .to(userExchange)
-            .with("user.*")
+            .with("user.*") // UserEventConstants.*
     }
 
+
+    @Bean
+    fun chatUserEventsQueue() = Queue(
+        /* name = */ MessageQueues.CHAT_USER_EVENTS,
+        /* durable = */ true
+    )
     @Bean
     fun chatUserEventsBinding(
         chatUserEventsQueue: Queue,
@@ -128,5 +120,32 @@ class RabbitMqConfig {
             .bind(chatUserEventsQueue)
             .to(userExchange)
             .with("user.*")
+    }
+
+
+    @Bean
+    fun notificationChatEventsQueue() = Queue(
+        /* name = */ MessageQueues.NOTIFICATION_CHAT_EVENTS,
+        /* durable = */ true
+    )
+    @Bean
+    fun chatExchange() = TopicExchange(
+        /* name = */ ChatEventConstants.CHAT_EXCHANGE,
+        /* durable = */ true,
+        /* autoDelete = */ false
+    )
+    @Bean
+    fun notificationChatEventsBinding(
+        notificationChatEventsQueue: Queue,
+        chatExchange: TopicExchange
+    ): Binding {
+        return BindingBuilder
+            .bind(notificationChatEventsQueue)
+            .to(chatExchange)
+            .with("chat.*")
+            /**
+             * ChatEventConstants.CHAT_NEW_MESSAGE
+             * ChatEventConstants.CHAT_UPDATED_MESSAGE
+             * */
     }
 }
