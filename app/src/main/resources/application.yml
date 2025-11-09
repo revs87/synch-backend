@@ -99,5 +99,7 @@ supabase:
 
 firebase:
   credentials-path: "classpath:firebase-credentials/synch-firebase-adminsdk.json"
-  client-package-name: "com.rvcoding.piptalk"
+  client-package-name: "com.rvcoding.pipchat"
 
+server:
+  port: 8091
