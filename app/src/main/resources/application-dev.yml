@@ -14,12 +14,12 @@ nginx:
 
 synch:
   email:
-    url: "http://localhost:8080"
+    url: "http://localhost:8091"
   rate-limit:
     ip:
       apply-limit: false
   web-socket:
-    allowed-origin: "http://localhost:8080"
+    allowed-origin: "http://localhost:8091"
 
 logging:
   level:

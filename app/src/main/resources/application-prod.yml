@@ -18,6 +18,6 @@ synch:
     url: "https://synch.rvcoding.com"
   rate-limit:
     ip:
-      apply-limit: true
+      apply-limit: false  # TODO: Update to true once is ready for production.
   web-socket:
     allowed-origin: "https://synch.rvcoding.com"
