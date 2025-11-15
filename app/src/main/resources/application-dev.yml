@@ -3,8 +3,9 @@ spring:
     hibernate:
       ddl-auto: update
   mail:
+    host: smtp.mailgun.org
     username: synchsmtp@sandbox46f1ced43a5d4e548b7e5b6665a69a6b.mailgun.org
-    password: ${MAILGUN_PASSWORD}
+    password: ${MAILGUN_PASSWORD_DEV}
 
 jwt:
   expiration-minutes: 1000
