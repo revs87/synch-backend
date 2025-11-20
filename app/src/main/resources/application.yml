@@ -99,7 +99,7 @@ supabase:
 
 firebase:
   credentials-path: "classpath:firebase-credentials/synch-firebase-adminsdk.json"
-  client-package-name: "com.rvcoding.pipchat"
+  client-package-name: "com.rvcoding.tasse"
 
 server:
   port: 8091
